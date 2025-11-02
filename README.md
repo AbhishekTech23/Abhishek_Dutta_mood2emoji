@@ -13,6 +13,8 @@ This app takes any short sentence and determines if it sounds happy, sad, or neu
 - Web app development with Streamlit
 - Importance of online safety and content filtering
 
+## To see the pdf
+Download pdf extension from vscode
 ## Dependencies & Setup
 
 1. **Install Python 3.9+** from [python.org](https://python.org)
