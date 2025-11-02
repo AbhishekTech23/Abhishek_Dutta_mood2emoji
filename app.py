@@ -1,6 +1,4 @@
 import streamlit as st
-from textblob import TextBlob
-import re
 
 # Configure the page
 st.set_page_config(
@@ -10,9 +8,7 @@ st.set_page_config(
 )
 
 # Safety filter - basic inappropriate word detection
-INAPPROPRIATE_WORDS = {
-    'bad', 'hate', 'stupid', 'dumb', 'ugly', 'kill', 'hurt', 'fight'
-}
+INAPPROPRIATE_WORDS = {'hate', 'stupid', 'ugly', 'kill', 'hurt', 'fight'}
 
 def is_text_safe(text):
     """Check if text contains inappropriate content"""
@@ -24,41 +20,34 @@ def is_text_safe(text):
 
 def analyze_mood(text):
     """
-    Analyze text mood using a combination of TextBlob and rule-based approach
-    Returns: (emoji, explanation, sentiment_score)
+    Analyze text mood using simple rule-based approach
+    Returns: (emoji, explanation)
     """
     if not text.strip():
-        return "🤔", "Please enter some text!", 0
+        return "🤔", "Please enter some text!"
     
     # Safety check first
     if not is_text_safe(text):
-        return "🚫", "Let's keep it positive and kind!", 0
+        return "🚫", "Let's keep it positive and kind!"
     
-    # Analyze with TextBlob
-    blob = TextBlob(text)
-    sentiment = blob.sentiment.polarity
-    
-    # Rule-based enhancement for common phrases
     text_lower = text.lower()
     
     # Happy indicators
-    happy_words = {'happy', 'good', 'great', 'awesome', 'amazing', 'love', 'like', 'fun', 'excited', 'yay', 'yes', 'wonderful'}
+    happy_words = {'happy', 'good', 'great', 'awesome', 'love', 'like', 'fun', 'excited', 'yay', 'yes', 'wonderful', 'best', 'nice', 'cool', 'fantastic'}
+    
     # Sad indicators  
-    sad_words = {'sad', 'bad', 'terrible', 'hate', 'angry', 'upset', 'cry', 'sorry', 'no', 'awful', 'horrible'}
+    sad_words = {'sad', 'bad', 'terrible', 'angry', 'upset', 'cry', 'sorry', 'no', 'awful', 'horrible', 'worst', 'hate', 'miss'}
     
     happy_count = sum(1 for word in happy_words if word in text_lower)
     sad_count = sum(1 for word in sad_words if word in text_lower)
     
-    # Combined scoring
-    final_score = sentiment + (happy_count * 0.1) - (sad_count * 0.1)
-    
     # Determine mood
-    if final_score > 0.1:
-        return "😀", "Sounds positive and happy!", final_score
-    elif final_score < -0.1:
-        return "😞", "This sounds a bit sad.", final_score
+    if happy_count > sad_count:
+        return "😀", "Sounds positive and happy!"
+    elif sad_count > happy_count:
+        return "😞", "This sounds a bit sad."
     else:
-        return "😐", "This seems pretty neutral.", final_score
+        return "😐", "This seems pretty neutral."
 
 def show_teacher_mode():
     """Show how the app works for teachers/advanced students"""
@@ -73,24 +62,22 @@ def show_teacher_mode():
         ↓
     Safety Check → If inappropriate → 🚫 "Let's keep it positive!"
         ↓
-    TextBlob Analysis (Sentiment Score: -1 to +1)
+    Count Happy Words (good, great, love, etc.)
         ↓
-    Rule-based Enhancement (Keyword Counting)
+    Count Sad Words (sad, bad, terrible, etc.)
         ↓
-    Combined Scoring
-        ↓
-    Final Decision:
-        > +0.1  → 😀 Happy
-        < -0.1  → 😞 Sad  
-        else    → 😐 Neutral
+    Compare Counts:
+        Happy > Sad → 😀 Happy
+        Sad > Happy → 😞 Sad  
+        Equal      → 😐 Neutral
     ```
     
-    ### Key Concepts Taught
+    ### What You're Learning
     
-    1. **Sentiment Analysis**: Computers can estimate emotions in text
-    2. **Rule-based Systems**: Simple if-then logic for classification
-    3. **Safety First**: Always filter content for age-appropriateness
-    4. **Combined Approaches**: Using both ML and rules for better accuracy
+    1. **Text Classification**: Computers can categorize text
+    2. **Rule-based Systems**: Simple if-then logic
+    3. **Safety First**: Always filter content
+    4. **Problem Solving**: Breaking down complex tasks
     """)
 
 # Main app interface
@@ -107,7 +94,7 @@ user_input = st.text_area(
 # Analyze button
 if st.button("Analyze Mood 🎯"):
     if user_input:
-        emoji, explanation, score = analyze_mood(user_input)
+        emoji, explanation = analyze_mood(user_input)
         
         # Display result
         col1, col2 = st.columns([1, 3])
@@ -115,12 +102,10 @@ if st.button("Analyze Mood 🎯"):
             st.markdown(f"# {emoji}")
         with col2:
             st.markdown(f"### {explanation}")
-            st.caption(f"Confidence score: {score:.2f}")
         
         # Show analysis details
-        with st.expander("See analysis details"):
-            st.write(f"**Original text:** '{user_input}'")
-            st.write(f"**Sentiment score:** {score:.2f} (range: -1 to +1)")
+        with st.expander("See how I decided"):
+            st.write(f"**Your text:** '{user_input}'")
             st.write(f"**Safety check:** {'✅ Passed' if is_text_safe(user_input) else '❌ Filtered'}")
             
     else:
@@ -132,4 +117,4 @@ if st.checkbox("Enable Teacher Mode"):
 
 # Footer
 st.markdown("---")
-st.caption("Built for learning - Safe for ages 12-16 | Uses TextBlob sentiment analysis")
+st.caption("Built for learning - Safe for ages 12-16 | Uses rule-based analysis")
