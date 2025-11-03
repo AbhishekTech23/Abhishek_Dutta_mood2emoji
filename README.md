@@ -31,4 +31,5 @@ Download pdf extension from vscode
    cd mood2emoji
 
    To run the application follow the command below:
+   Open your terminal and type the command below,
    streamlit run app.py
